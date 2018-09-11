@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<modification>
+    <name>Категории без количества</name>
+    <code>mymodule</code>
+    <version>1.0</version>
+    <author>s-engineer</author>
+    <link>s-engineer.ru</link>
+    <file path="catalog/controller/common/header.php">
+        <operation>
+            <search regex="true"><![CDATA[
+            				/foreach ($children as $child) {.*}/Uism
+            ]]>
+            </search>
+            <add position="replace"><![CDATA[
+	                    foreach ($children as $child) {
+                    //  code level 3
+
+                    $grandchildren_data = array();
+
+                    $grandchildren1 = $this->model_catalog_category->getCategories($child['category_id']);
+
+                    foreach ($grandchildren1 as $grandchild1) {
+                        $grandchildren_data1 = array();
+
+                        $grandchildren2 = $this->model_catalog_category->getCategories($grandchild1['category_id']);
+
+                        foreach ($grandchildren2 as $grandchild2) {
+
+                            $grandchild_filter_data22 = array(
+                                'filter_category_id'  => $grandchild2['category_id'],
+                                'filter_sub_category' => true
+                            );
+
+                            $grandchildren_data2[] = array(
+                                'name'  => $grandchild2['name'] . ($this->config->get('config_product_count') ? ' (' . $this->model_catalog_product->getTotalProducts($grandchild_filter_data2) . ')' : ''),
+                                'href'  => $this->url->link('product/category', 'path=' . $category['category_id'] . '_' . $grandchild2['category_id'])
+                            );
+                        }
+
+                        $grandchild_filter_data = array(
+                            'filter_category_id'  => $grandchild1['category_id'],
+                            'filter_sub_category' => true
+                        );
+
+                        $grandchildren_data[] = array(
+                            'name'  => $grandchild1['name'] . ($this->config->get('config_product_count') ? ' (' . $this->model_catalog_product->getTotalProducts($grandchild_filter_data) . ')' : ''),
+                            'href'  => $this->url->link('product/category', 'path=' . $category['category_id'] . '_' . $grandchild1['category_id']),
+                             'children' => $grandchildren_data2
+                        );
+                    }
+
+                    //  code level 2
+                        $filter_data = array(
+                            'filter_category_id' => $child['category_id'],
+                            'filter_sub_category' => true
+                        );
+
+                        $children_data[] = array(
+                            'name' => $child['name'] . ($this->config->get('config_product_count') ? ' (' . $this->model_catalog_product->getTotalProducts($filter_data) . ')' : ''),
+                            'href' => $this->url->link('product/category', 'path=' . $category['category_id'] . '_' . $child['category_id']),
+                             'children' => $grandchildren_data
+                        );
+
+                }
+
+	    ]]></add>
+        </operation>
+    </file>
+     <file path="catalog/view/theme/default/template/common/header.tpl">
+        <operation>
+            <search regex="true"><![CDATA[
+          /<li class="dropdown">.*</li>/Uism
+            ]]></search>
+            <add position="replace"><![CDATA[
+	    <div class="collapse navbar-collapse navbar-ex1-collapse">
+      <ul class="nav navbar-nav">
+        <?php foreach ($categories as $category) { ?>
+        <?php if ($category['children']) { ?>
+        <li class="dropdown"><a href="<?php echo $category['href']; ?>" class="dropdown-toggle" data-toggle="dropdown"><?php echo $category['name']; ?></a>
+          <div class="dropdown-menu">
+            <div class="dropdown-inner">
+              <?php foreach (array_chunk($category['children'], ceil(count($category['children']) / $category['column'])) as $children) { ?>
+              <ul class="list-unstyled">
+                <?php foreach ($children as $child) { ?>
+                <li><a href="<?php echo $child['href']; ?>"><?php echo $child['name']; ?></a>
+                  <?php if($child['children']){ ?>
+                  <ul>
+                    <?php foreach ($child['children'] as $child) { ?>
+                    <li><a href="<?php echo $child['href']; ?>"><?php echo $child['name']; ?></a>
+                      <?php if($child['children']){ ?>
+                      <ul>
+                        <?php foreach ($child['children'] as $child) { ?>
+                        <li><a href="<?php echo $child['href']; ?>"><?php echo $child['name']; ?></a></li>
+                        <?php } ?>
+                      </ul>
+                      <?php } ?>
+                    </li>
+                    <?php } ?>
+                  </ul>
+                  <?php } ?>
+                </li>
+                <?php } ?>
+              </ul>
+              <?php } ?>
+            </div>
+            <a href="<?php echo $category['href']; ?>" class="see-all"><?php echo $text_all; ?> <?php echo $category['name']; ?></a> </div>
+        </li>
+        <?php } else { ?>
+        <li><a href="<?php echo $category['href']; ?>"><?php echo $category['name']; ?></a></li>
+        <?php } ?>
+        <?php } ?>
+      </ul>
+    </div>
+	    ]]></add>
+        </operation>
+    </file>
+
+
+
+</modification>

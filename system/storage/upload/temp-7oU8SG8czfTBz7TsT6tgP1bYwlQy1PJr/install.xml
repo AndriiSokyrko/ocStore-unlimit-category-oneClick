@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<modification>
+    <name>Категории без количества</name>
+    <code>mymodule</code>
+    <version>1.0</version>
+    <author>s-engineer</author>
+    <link>s-engineer.ru</link>
+    <file path="catalog/controller/module/category.php">
+        <operation>
+            <search><![CDATA[
+            'name'        => $category['name'] . ($this->config->get('config_product_count') ? ' (' . $this->model_catalog_product->getTotalProducts($filter_data) . ')' : ''),
+            ]]></search>
+            <add position="replace"><![CDATA[
+	    'name'        => $category['name'],
+	    ]]></add>
+        </operation>
+    </file>  
+</modification>
